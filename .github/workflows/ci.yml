@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# Permisos mínimos: solo lectura del contenido del repositorio.
+# Este workflow no escribe nada, no publica nada y no usa secretos.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  comprobaciones:
+    name: Comprobaciones (typecheck, test, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Obtener el código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Instalar dependencias de forma reproducible
+        run: npm ci
+
+      - name: Comprobar tipos
+        run: npm run typecheck
+
+      - name: Ejecutar pruebas unitarias
+        run: npm run test
+
+      - name: Compilar el sitio estático
+        run: npm run build

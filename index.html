@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="CalzaCV: comparador local de una oferta laboral con tu perfil, con la evidencia de los dos lados. Funciona en el navegador, sin cuentas ni servidores."
+    />
+    <title>CalzaCV — comparador local de oferta y perfil</title>
+  </head>
+  <body>
+    <a class="salto-contenido" href="#contenido">Saltar al contenido principal</a>
+
+    <header class="cabecera">
+      <div class="cabecera__marca">
+        <h1 class="cabecera__titulo">CalzaCV</h1>
+        <p class="cabecera__lema">
+          Comparador local de una oferta laboral con tu perfil:requisito por requisito, con la
+          evidencia de los dos lados.
+        </p>
+      </div>
+      <ul class="etiquetas" aria-label="Características de esta versión">
+        <li class="etiqueta">Sin puntaje general</li>
+        <li class="etiqueta">Sin IA externa</li>
+        <li class="etiqueta">Tus datos en tu navegador</li>
+      </ul>
+    </header>
+
+    <main id="contenido" class="disposicion">
+      <!-- 1. Oferta -->
+      <section class="panel panel--oferta" aria-labelledby="titulo-oferta">
+        <h2 class="panel__titulo" id="titulo-oferta"><span class="paso" aria-hidden="true">1</span> Oferta laboral</h2>
+        <p class="panel__ayuda">
+          Pega el texto de la oferta. Todo el procesamiento ocurre en tu navegador: no se envía a
+          ningún servidor.
+        </p>
+
+        <label class="campo" for="oferta-texto">
+          <span class="campo__etiqueta">Texto de la oferta</span>
+          <textarea
+            id="oferta-texto"
+            class="entrada entrada--area entrada--oferta"
+            rows="12"
+            spellcheck="false"
+            placeholder="Pega aquí la oferta…"
+          ></textarea>
+        </label>
+
+        <div class="acciones">
+          <button type="button" id="btn-analizar" class="boton boton--principal">Analizar oferta</button>
+          <button type="button" id="btn-demo" class="boton">Cargar demo ficticia</button>
+        </div>
+
+        <h3 class="panel__subtitulo" id="titulo-requisitos">
+          Requisitos <span id="contador-requisitos" class="contador">0</span>
+        </h3>
+        <p class="panel__ayuda">
+          Revisa lo detectado, corrige el texto o agrega requisitos a mano. La segmentación usa
+          reglas simples: no adivina.
+        </p>
+        <ul id="lista-requisitos" class="lista" aria-labelledby="titulo-requisitos"></ul>
+        <button type="button" id="btn-agregar-requisito" class="boton boton--secundario">
+          Agregar requisito
+        </button>
+      </section>
+
+      <!-- 2. Perfil -->
+      <section class="panel panel--perfil" aria-labelledby="titulo-perfil">
+        <h2 class="panel__titulo" id="titulo-perfil"><span class="paso" aria-hidden="true">2</span> Evidencias de tu perfil</h2>
+        <p class="panel__ayuda">
+          Registra lo que sí puedes sustentar: actividades, proyectos, estudios, experiencia. La
+          evidencia es la base de la comparación.
+        </p>
+        <ul id="lista-evidencias" class="lista" aria-labelledby="titulo-perfil"></ul>
+        <button type="button" id="btn-agregar-evidencia" class="boton boton--secundario">
+          Agregar evidencia
+        </button>
+      </section>
+
+      <!-- 3. Comparación -->
+      <section class="panel panel--comparacion" aria-labelledby="titulo-comparacion">
+        <h2 class="panel__titulo" id="titulo-comparacion"><span class="paso" aria-hidden="true">3</span> Comparación</h2>
+        <p class="panel__ayuda">
+          Cada fila muestra el requisito, la frase de la oferta, la evidencia de tu perfil y la
+          sugerencia del sistema. La sugerencia se recalcula sola; tu corrección se guarda aparte.
+        </p>
+
+        <div class="tabla-envoltura" role="region" aria-label="Comparación, tabla desplazable" tabindex="0">
+          <table class="tabla">
+            <caption class="tabla__leyenda">
+              Comparación requisito por requisito (en pantallas pequeñas la tabla se desplaza en
+              horizontal)
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Requisito</th>
+                <th scope="col">Evidencia de la oferta</th>
+                <th scope="col">Evidencia de tu perfil</th>
+                <th scope="col">Sugerencia del sistema</th>
+                <th scope="col">Tu corrección</th>
+              </tr>
+            </thead>
+            <tbody id="filas-comparacion"></tbody>
+          </table>
+        </div>
+
+        <p class="nota">
+          «Brecha» significa que <strong>no se encontró evidencia en tu perfil</strong>; no afirma
+          que carezcas de la habilidad. CalzaCV no calcula un puntaje general ni estima tu
+          evaluación en sistemas de seguimiento de postulaciones.
+        </p>
+      </section>
+
+      <!-- 4. Datos locales -->
+      <section class="panel panel--datos" aria-labelledby="titulo-datos">
+        <h2 class="panel__titulo" id="titulo-datos">Datos locales</h2>
+        <p id="aviso-guardado" class="aviso" role="status" aria-live="polite"></p>
+        <div class="acciones">
+          <button type="button" id="btn-exportar" class="boton">Exportar JSON</button>
+          <label class="boton boton--archivo" for="input-importar">
+            Importar JSON
+            <input
+              id="input-importar"
+              class="visualmente-oculto"
+              type="file"
+              accept="application/json,.json"
+            />
+          </label>
+          <button type="button" id="btn-vaciar" class="boton boton--peligro">Vaciar todo</button>
+        </div>
+        <p class="panel__ayuda">
+          Todo se guarda en este navegador, en la clave <code>calzacv:estado:v1</code>. Exporta con
+          regularidad si quieres una copia de seguridad.
+        </p>
+      </section>
+    </main>
+
+    <footer class="pie">
+      <p>
+        CalzaCV es un prototipo en español, local y sin costo. No envía postulaciones, no hace
+        scraping de ofertas, no usa IA externa y no predice resultados de filtros automáticos.
+      </p>
+    </footer>
+
+    <dialog id="dialogo-correccion" class="dialogo" aria-labelledby="titulo-dialogo">
+      <form id="form-correccion" class="dialogo__formulario" method="dialog">
+        <h2 class="dialogo__titulo" id="titulo-dialogo">Corregir el estado</h2>
+        <p class="dialogo__requisito" id="dialogo-requisito"></p>
+        <p class="dialogo__pista">
+          Tu corrección se guarda en un campo aparte: no modifica la sugerencia del sistema ni las
+          evidencias registradas.
+        </p>
+
+        <fieldset class="campo campo--grupo">
+          <legend class="campo__etiqueta">Estado corregido</legend>
+          <label class="opcion">
+            <input type="radio" name="estado" value="coincide" />
+            <span>Coincide — hay evidencia en tu perfil</span>
+          </label>
+          <label class="opcion">
+            <input type="radio" name="estado" value="coincidencia_posible" />
+            <span>Coincidencia posible — la evidencia es parcial</span>
+          </label>
+          <label class="opcion">
+            <input type="radio" name="estado" value="brecha" />
+            <span>Brecha — no se encontró evidencia en tu perfil</span>
+          </label>
+          <label class="opcion">
+            <input type="radio" name="estado" value="informacion_insuficiente" />
+            <span>Información insuficiente — no se puede evaluar</span>
+          </label>
+        </fieldset>
+
+        <label class="campo" for="dialogo-nota">
+          <span class="campo__etiqueta">Nota (opcional)</span>
+          <textarea id="dialogo-nota" class="entrada entrada--area" rows="3"></textarea>
+        </label>
+
+        <div class="acciones">
+          <button type="submit" class="boton boton--principal">Guardar corrección</button>
+          <button type="button" id="btn-cerrar-dialogo" class="boton">Cancelar</button>
+          <button type="button" id="btn-quitar-correccion" class="boton boton--peligro" hidden>
+            Quitar corrección
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

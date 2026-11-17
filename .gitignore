@@ -1,0 +1,31 @@
+# Dependencias y build
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Secretos (no deben existir en este proyecto, pero se ignoran por si acaso)
+.env
+.env.*
+!.env.example
+
+# Datos locales del usuario: ofertas pegadas, perfiles, exportaciones, respaldos
+datos/
+datos-locales/
+perfil.*
+oferta.*
+*.perfil.json
+*.oferta.json
+calzacv-local.json
+calzacv-*.json
+!package-lock.json
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
