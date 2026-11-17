@@ -28,7 +28,46 @@
       </ul>
     </header>
 
-    <main id="contenido" class="disposicion">
+    <main id="contenido" class="disposicion" data-fase="uso">
+      <!-- Primera visita: elección explícita entre demo y datos propios -->
+      <section id="bienvenida" class="bienvenida" aria-labelledby="titulo-bienvenida" hidden>
+        <h2 class="bienvenida__titulo" id="titulo-bienvenida">¿Por dónde quieres empezar?</h2>
+        <p class="bienvenida__texto">
+          CalzaCV compara los requisitos de una oferta con las evidencias de tu perfil. No hay
+          cuentas, no hay servidor y no hace falta pegar el CV completo.
+        </p>
+        <div class="bienvenida__opciones">
+          <div class="opcion-inicio">
+            <button type="button" id="btn-empezar-demo" class="boton boton--grande boton--principal">
+              Probar con la demo
+            </button>
+            <p class="opcion-inicio__detalle">
+              Oferta y perfil <strong>inventados</strong>, para ver cómo funciona. No es un análisis real.
+            </p>
+          </div>
+          <div class="opcion-inicio">
+            <button type="button" id="btn-empezar-mis-datos" class="boton boton--grande">
+              Empezar con mis datos
+            </button>
+            <p class="opcion-inicio__detalle">
+              Empiezas vacío: pegas una oferta y un resumen de tu perfil, en ese orden.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Aviso persistente mientras se está viendo la demo -->
+      <aside id="banner-demo" class="banner banner--demo" aria-labelledby="titulo-banner-demo" hidden>
+        <div class="banner__texto">
+          <p class="banner__titulo" id="titulo-banner-demo">Estás viendo una demo con datos ficticios</p>
+          <p class="banner__descripcion">
+            La oferta y el perfil de ejemplo están inventados: este resultado no es un análisis de tu
+            perfil.
+          </p>
+        </div>
+        <button type="button" id="btn-banner-mis-datos" class="boton">Empezar con mis datos</button>
+      </aside>
+
       <!-- 1. Oferta -->
       <section class="panel panel--oferta" aria-labelledby="titulo-oferta">
         <h2 class="panel__titulo" id="titulo-oferta"><span class="paso" aria-hidden="true">1</span> Oferta laboral</h2>
@@ -73,6 +112,45 @@
           Registra lo que sí puedes sustentar: actividades, proyectos, estudios, experiencia. La
           evidencia es la base de la comparación.
         </p>
+
+        <div class="ingesta">
+          <h3 class="panel__subtitulo" id="titulo-ingesta">Pegar tu perfil de una vez</h3>
+          <p class="panel__ayuda">
+            Pega un resumen o los fragmentos del CV que te interesen: cada línea se convierte en una
+            evidencia editable. No hace falta subir el archivo ni pegar el CV completo.
+          </p>
+          <label class="campo" for="texto-perfil">
+            <span class="campo__etiqueta">Resumen o fragmentos de tu CV</span>
+            <textarea
+              id="texto-perfil"
+              class="entrada entrada--area entrada--perfil"
+              rows="6"
+              spellcheck="false"
+              aria-describedby="nota-perfil"
+              placeholder="Ejemplo:&#10;- Control de inventario en bodega&#10;- Consultas SQL y diseño de bases de datos&#10;- Inglés básico para lectura de documentación"
+            ></textarea>
+          </label>
+          <p class="nota nota--pequeña" id="nota-perfil">
+            No hace falta incluir datos de contacto (correo, teléfono, RUT, dirección): con tu nombre
+            y tu rol basta. Todo queda en este navegador.
+          </p>
+          <div class="acciones">
+            <button type="button" id="btn-ver-fragmentos" class="boton boton--principal">
+              Ver fragmentos sugeridos
+            </button>
+          </div>
+          <div id="previa-fragmentos" class="previa" hidden>
+            <p id="previa-resumen" class="previa__resumen" role="status" tabindex="-1"></p>
+            <ul id="previa-lista" class="previa__lista"></ul>
+            <div class="acciones">
+              <button type="button" id="btn-anadir-fragmentos" class="boton boton--principal">
+                Añadir
+              </button>
+              <button type="button" id="btn-cancelar-fragmentos" class="boton">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
         <ul id="lista-evidencias" class="lista" aria-labelledby="titulo-perfil"></ul>
         <button type="button" id="btn-agregar-evidencia" class="boton boton--secundario">
           Agregar evidencia

@@ -201,10 +201,25 @@ code {
   gap: 1.25rem;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
+    'bienvenida'
+    'banner'
     'oferta'
     'perfil'
     'comparacion'
     'datos';
+}
+
+.bienvenida {
+  grid-area: bienvenida;
+}
+
+.banner {
+  grid-area: banner;
+}
+
+/* Mientras se elige por dónde empezar, los paneles quedan ocultos. */
+.disposicion[data-fase='bienvenida'] .panel {
+  display: none;
 }
 
 .panel--oferta {
@@ -224,6 +239,8 @@ code {
   .disposicion {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-areas:
+      'bienvenida bienvenida'
+      'banner banner'
       'oferta perfil'
       'comparacion comparacion'
       'datos datos';
@@ -234,6 +251,8 @@ code {
   .disposicion {
     grid-template-columns: minmax(22rem, 26rem) minmax(0, 1fr);
     grid-template-areas:
+      'bienvenida bienvenida'
+      'banner banner'
       'oferta comparacion'
       'perfil comparacion'
       'datos datos';
@@ -645,6 +664,139 @@ code {
   font-size: 0.85rem;
   border-top: 1px solid var(--borde);
   padding-top: 1rem;
+}
+
+/* --- Bienvenida (primera visita) -------------------------------------------- */
+
+.bienvenida {
+  background: var(--fondo-panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bienvenida__titulo {
+  font-size: 1.35rem;
+}
+
+.bienvenida__texto {
+  color: var(--texto-suave);
+  max-width: 62ch;
+}
+
+.bienvenida__opciones {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  margin-top: 0.35rem;
+}
+
+.opcion-inicio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.9rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-s);
+  background: var(--fondo-tenue);
+}
+
+.opcion-inicio__detalle {
+  font-size: 0.88rem;
+  color: var(--texto-suave);
+}
+
+.boton--grande {
+  font-size: 1rem;
+  padding: 0.6rem 1.1rem;
+}
+
+/* --- Banner de demo -------------------------------------------------------- */
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: var(--radio);
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--ambar-borde);
+  background: var(--ambar-fondo);
+  color: var(--ambar-texto);
+}
+
+.banner__texto {
+  min-width: 0;
+}
+
+.banner__titulo {
+  font-weight: 700;
+}
+
+.banner__descripcion {
+  font-size: 0.9rem;
+}
+
+.banner .boton {
+  background: var(--fondo-panel);
+  border-color: currentColor;
+  color: inherit;
+}
+
+/* --- Ingesta de perfil ----------------------------------------------------- */
+
+.ingesta {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-s);
+  background: var(--fondo-tenue);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.entrada--perfil {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.nota--pequeña {
+  font-size: 0.84rem;
+  padding: 0.45rem 0.65rem;
+}
+
+.previa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-s);
+  background: var(--fondo-panel);
+  padding: 0.75rem;
+}
+
+.previa__resumen {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.previa__lista {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.previa__lista li {
+  overflow-wrap: anywhere;
 }
 
 /* --- Diálogo --------------------------------------------------------------- */

@@ -4,6 +4,7 @@
  */
 
 import { crear, vaciar } from './dom';
+import type { ResultadoIngesta } from '../dominio/ingesta';
 import type { Estado, EvidenciaPerfil, FilaComparacion, Requisito } from '../dominio/tipos';
 
 const FORMATO_FECHA = new Intl.DateTimeFormat('es', { dateStyle: 'medium', timeStyle: 'short' });
@@ -27,7 +28,6 @@ export interface ManejadoresRequisitos {
   alCambiarTexto(id: string, texto: string): void;
   alEliminar(id: string): void;
 }
-
 export function renderRequisitos(
   contenedor: HTMLElement,
   requisitos: Requisito[],
@@ -272,5 +272,47 @@ export function renderComparacion(
     const celdaCorreccion = crear('td', { class: 'celda celda--correccion' }, acciones);
 
     cuerpo.append(crear('tr', {}, [celdaRequisito, celdaOferta, celdaPerfil, celdaSugerencia, celdaCorreccion]));
+  }
+}
+
+/**
+ * Vista previa de la ingesta de perfil: cuántas evidencias se añadirán y cuáles son,
+ * antes de confirmar. Todo el texto se inserta como texto plano.
+ */
+export function renderPreviaFragmentos(
+  lista: HTMLElement,
+  resumen: HTMLElement,
+  resultado: ResultadoIngesta,
+): void {
+  vaciar(lista);
+
+  const partes: string[] = [];
+  const cantidad = resultado.fragmentos.length;
+
+  if (cantidad === 0) {
+    partes.push('No se encontró ningún fragmento nuevo que añadir');
+  } else if (cantidad === 1) {
+    partes.push('Se añadirá 1 evidencia nueva');
+  } else {
+    partes.push(`Se añadirán ${cantidad} evidencias nuevas`);
+  }
+
+  if (resultado.duplicados > 0) {
+    partes.push(`${resultado.duplicados} línea(s) repetida(s) se omiten`);
+  }
+  if (resultado.yaExistentes > 0) {
+    partes.push(`${resultado.yaExistentes} ya coinciden con una evidencia tuya`);
+  }
+  if (resultado.encabezados > 0) {
+    partes.push(`${resultado.encabezados} encabezado(s) se ignoran`);
+  }
+  if (resultado.vacias > 0) {
+    partes.push(`${resultado.vacias} línea(s) vacía(s) se ignoran`);
+  }
+
+  resumen.textContent = `${partes.join(' · ')}.`;
+
+  for (const fragmento of resultado.fragmentos) {
+    lista.append(crear('li', { texto: fragmento }));
   }
 }

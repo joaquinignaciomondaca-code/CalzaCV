@@ -76,6 +76,12 @@ export interface EtiquetaReferencia {
 export interface EstadoApp {
   /** Versión del formato guardado, para poder migrar o descartar en el futuro. */
   version: number;
+  /**
+   * De dónde vienen los datos que hay en pantalla:
+   *   - 'demo'   → datos ficticios de ejemplo (se avisa con un banner visible);
+   *   - 'usuario' → datos reales de la persona.
+   */
+  origen: 'demo' | 'usuario';
   /** Texto de la oferta pegado por la persona. */
   oferta: string;
   requisitos: Requisito[];

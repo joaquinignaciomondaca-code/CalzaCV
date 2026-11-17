@@ -42,6 +42,10 @@ describe('demo ficticia', () => {
     expect(estadoDe('Varios según experiencia')).toBe('informacion_insuficiente');
   });
 
+  it('la demo se identifica como demo en el estado guardado', () => {
+    expect(estado.origen).toBe('demo');
+  });
+
   it('la demo no trae correcciones ni referencias inventadas', () => {
     expect(estado.correcciones).toEqual({});
     expect(estado.referencias).toEqual({});

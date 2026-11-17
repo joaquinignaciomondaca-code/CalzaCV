@@ -8,7 +8,8 @@ import {
   estadoInicial,
 } from '../src/almacenamiento/local';
 import type { Almacen } from '../src/almacenamiento/local';
-import { CLAVE_ESTADO, VERSION_DATOS } from '../src/almacenamiento/version';
+import { CLAVE_ESTADO, CLAVE_ESTADO_V1, VERSION_DATOS } from '../src/almacenamiento/version';
+import { OFERTA_DEMO } from '../src/dominio/datos-demo';
 import type { EstadoApp } from '../src/dominio/tipos';
 
 function almacenMemoria(): { almacen: Almacen; datos: Map<string, string> } {
@@ -30,6 +31,7 @@ function almacenMemoria(): { almacen: Almacen; datos: Map<string, string> } {
 function estadoDePrueba(): EstadoApp {
   return {
     version: VERSION_DATOS,
+    origen: 'usuario',
     oferta: 'Oferta ficticia de prueba',
     requisitos: [
       { id: 'req_1', texto: 'Excel', fraseOferta: 'Excel', linea: 2, origen: 'segmentacion' },
@@ -70,6 +72,50 @@ describe('almacenamiento local versionado', () => {
   });
 });
 
+describe('migración del formato anterior (v1 → v2)', () => {
+  it('migra un estado v1 y lo guarda en la versión actual', () => {
+    const { almacen, datos } = almacenMemoria();
+    datos.set(
+      CLAVE_ESTADO_V1,
+      JSON.stringify({
+        version: 1,
+        oferta: 'Mi oferta',
+        requisitos: [],
+        evidenciasPerfil: [],
+        correcciones: {},
+        referencias: {},
+      }),
+    );
+
+    const estado = cargar(almacen);
+    expect(estado).not.toBeNull();
+    expect(estado?.version).toBe(VERSION_DATOS);
+    expect(estado?.origen).toBe('usuario');
+    expect(estado?.oferta).toBe('Mi oferta');
+    // Queda guardado en la clave actual y se retira la copia del formato anterior.
+    expect(datos.has(CLAVE_ESTADO)).toBe(true);
+    expect(datos.has(CLAVE_ESTADO_V1)).toBe(false);
+  });
+
+  it('un estado v1 que todavía tiene la oferta de la demo se marca como demo', () => {
+    const { almacen, datos } = almacenMemoria();
+    datos.set(
+      CLAVE_ESTADO_V1,
+      JSON.stringify({
+        version: 1,
+        oferta: OFERTA_DEMO,
+        requisitos: [],
+        evidenciasPerfil: [],
+        correcciones: {},
+        referencias: {},
+      }),
+    );
+
+    const estado = cargar(almacen);
+    expect(estado?.origen).toBe('demo');
+  });
+});
+
 describe('exportar / importar JSON', () => {
   it('el round-trip conserva el estado completo (incluidas las correcciones)', () => {
     const estado = estadoDePrueba();
@@ -90,6 +136,16 @@ describe('exportar / importar JSON', () => {
     expect(resultado.error).toMatch(/JSON/i);
   });
 
+  it('importa un archivo del formato anterior migrándolo', () => {
+    const resultado = importarJSON(
+      JSON.stringify({ version: 1, oferta: 'Oferta antigua', requisitos: [], evidenciasPerfil: [], correcciones: {}, referencias: {} }),
+    );
+    expect(resultado.ok).toBe(true);
+    if (!resultado.ok) return;
+    expect(resultado.estado.version).toBe(VERSION_DATOS);
+    expect(resultado.estado.origen).toBe('usuario');
+  });
+
   it('rechaza un JSON que no es un estado de CalzaCV', () => {
     const resultado = importarJSON(JSON.stringify({ hola: 'mundo' }));
     expect(resultado.ok).toBe(false);
@@ -100,6 +156,7 @@ describe('exportar / importar JSON', () => {
   it('descarta entradas inválidas sin inventar datos', () => {
     const estado = normalizarEstado({
       version: VERSION_DATOS,
+      origen: 'usuario',
       oferta: 'texto',
       requisitos: [
         { id: 'ok', texto: 'Excel', fraseOferta: 'Excel', linea: 1, origen: 'manual' },
@@ -115,9 +172,10 @@ describe('exportar / importar JSON', () => {
     expect(estado?.requisitos[0].id).toBe('ok');
   });
 
-  it('el estado inicial está vacío y versionado', () => {
+  it('el estado inicial está vacío, versionado y marcado como datos propios', () => {
     const estado = estadoInicial();
     expect(estado.version).toBe(VERSION_DATOS);
+    expect(estado.origen).toBe('usuario');
     expect(estado.requisitos).toEqual([]);
     expect(estado.correcciones).toEqual({});
     expect(estado.referencias).toEqual({});

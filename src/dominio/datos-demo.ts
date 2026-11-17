@@ -65,6 +65,7 @@ export function estadoDemo(): EstadoApp {
 
   return {
     version: VERSION_DATOS,
+    origen: 'demo',
     oferta: OFERTA_DEMO,
     requisitos: segmentarOferta(OFERTA_DEMO),
     evidenciasPerfil,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { construirFila, construirFilas } from '../src/dominio/evaluacion';
 import { sugerir } from '../src/dominio/matching';
+import { VERSION_DATOS } from '../src/almacenamiento/version';
 import type { EstadoApp, Requisito } from '../src/dominio/tipos';
 
 const REQUISITO: Requisito = {
@@ -59,7 +60,8 @@ describe('distinción entre sugerencia, corrección y referencia', () => {
 
   it('el estado guardado no contiene ningún campo de sugerencia ni de puntaje', () => {
     const estado: EstadoApp = {
-      version: 1,
+      version: VERSION_DATOS,
+      origen: 'usuario',
       oferta: '',
       requisitos: [REQUISITO],
       evidenciasPerfil: EVIDENCIAS,

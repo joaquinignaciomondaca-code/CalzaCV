@@ -5,7 +5,8 @@
  * (o en cualquier almacén con la misma interfaz, como el de memoria en las pruebas).
  */
 
-import { CLAVE_ESTADO, VERSION_DATOS } from './version';
+import { CLAVE_ESTADO, CLAVE_ESTADO_V1, VERSION_DATOS } from './version';
+import { migrarV1AV2 } from './migraciones';
 import type {
   CorreccionUsuario,
   Estado,
@@ -22,10 +23,11 @@ export interface Almacen {
   borrar(clave: string): void;
 }
 
-/** Estado vacío (sin datos precargados). */
+/** Estado vacío (sin datos precargados), listo para usar con datos propios. */
 export function estadoInicial(): EstadoApp {
   return {
     version: VERSION_DATOS,
+    origen: 'usuario',
     oferta: '',
     requisitos: [],
     evidenciasPerfil: [],
@@ -96,24 +98,21 @@ function isEstado(valor: unknown): valor is Estado {
 function esCorreccion(valor: unknown): valor is CorreccionUsuario {
   if (typeof valor !== 'object' || valor === null) return false;
   const c = valor as Record<string, unknown>;
-  return (
-    isEstado(c.estado) && typeof c.nota === 'string' && typeof c.fecha === 'string'
-  );
+  return isEstado(c.estado) && typeof c.nota === 'string' && typeof c.fecha === 'string';
 }
 
 function esReferencia(valor: unknown): valor is EtiquetaReferencia {
   if (typeof valor !== 'object' || valor === null) return false;
   const r = valor as Record<string, unknown>;
-  return (
-    isEstado(r.estado) && typeof r.nota === 'string' && typeof r.fuente === 'string'
-  );
+  return isEstado(r.estado) && typeof r.nota === 'string' && typeof r.fuente === 'string';
 }
 
-/** Valida y normaliza un objeto desconocido como `EstadoApp`. */
+/** Valida y normaliza un objeto desconocido como `EstadoApp` de la versión actual. */
 export function normalizarEstado(valor: unknown): EstadoApp | null {
   if (typeof valor !== 'object' || valor === null) return null;
   const dato = valor as Record<string, unknown>;
   if (dato.version !== VERSION_DATOS) return null;
+  if (dato.origen !== 'demo' && dato.origen !== 'usuario') return null;
   if (typeof dato.oferta !== 'string') return null;
   if (!Array.isArray(dato.requisitos) || !Array.isArray(dato.evidenciasPerfil)) return null;
 
@@ -133,6 +132,7 @@ export function normalizarEstado(valor: unknown): EstadoApp | null {
 
   return {
     version: VERSION_DATOS,
+    origen: dato.origen,
     oferta: dato.oferta,
     requisitos: (dato.requisitos as unknown[]).filter(esRequisito),
     evidenciasPerfil: (dato.evidenciasPerfil as unknown[]).filter(esEvidencia),
@@ -142,12 +142,39 @@ export function normalizarEstado(valor: unknown): EstadoApp | null {
 }
 
 /**
- * Carga el estado guardado. Devuelve `null` si no hay nada, si el formato no es válido
- * o si la versión guardada es distinta a la soportada (no se intenta migrar a ciegas).
+ * Carga el estado guardado. Devuelve `null` si no hay nada o si el formato no es válido.
+ * Si encuentra un estado del formato anterior, lo migra, lo guarda en la versión actual
+ * y elimina la copia antigua (que ya quedó superada).
  */
 export function cargar(almacen: Almacen): EstadoApp | null {
   const bruto = almacen.leer(CLAVE_ESTADO);
-  if (!bruto) return null;
+  if (bruto) {
+    const estado = intentarNormalizar(bruto);
+    if (estado) return estado;
+  }
+
+  const brutoV1 = almacen.leer(CLAVE_ESTADO_V1);
+  if (!brutoV1) return null;
+
+  let datos: unknown;
+  try {
+    datos = JSON.parse(brutoV1) as unknown;
+  } catch {
+    return null;
+  }
+
+  const migrado = migrarV1AV2(datos);
+  if (!migrado) return null;
+
+  const estado = normalizarEstado(migrado);
+  if (!estado) return null;
+
+  guardar(almacen, estado);
+  almacen.borrar(CLAVE_ESTADO_V1);
+  return estado;
+}
+
+function intentarNormalizar(bruto: string): EstadoApp | null {
   try {
     return normalizarEstado(JSON.parse(bruto) as unknown);
   } catch {
@@ -172,7 +199,7 @@ export function importarJSON(texto: string): ResultadoImportacion {
   } catch {
     return { ok: false, error: 'El archivo no es un JSON válido.' };
   }
-  const estado = normalizarEstado(datos);
+  const estado = normalizarEstado(datos) ?? migrarV1AV2(datos);
   if (!estado) {
     return {
       ok: false,
